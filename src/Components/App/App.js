@@ -3,13 +3,14 @@ import "./App.css";
 import Playlist from "../Playlist/Playlist";
 import SearchBar from "../SearchBar/SearchBar";
 import SearchResults from "../SearchResults/SearchResults";
+import Spotify from "../../util/Spotify";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       searchResults: [],
-      playlistName: "New Playlist Name",
+      playlistName: "New Playlist",
       playlistTracks: [],
     };
     this.addTrack = this.addTrack.bind(this);
@@ -40,14 +41,24 @@ class App extends React.Component {
   }
 
   savePlaylist() {
-    // let trackURIs = this.state.playlistTracks.map((track) => track.uri);
-    
+    let trackUris = this.state.playlistTracks.map((track) => track.uri);
+    if (trackUris && trackUris.length) {
+      Spotify.savePlayList(this.state.playlistName, trackUris).then(() => {
+        // this.getUserPlaylists();
+        this.setState({
+          playlistName: "New Playlist",
+          playlistTracks: [],
+        });
+      });
+    } else {
+      alert("Please add tracks to your Playlist.");
+    }
   }
 
   search(term) {
-  //  Spotify.search(term).then((searchResults) => {
-  //    this.setState({ searchResults: searchResults });
-  //  });
+    Spotify.search(term).then((searchResults) => {
+      this.setState({ searchResults: searchResults });
+    });
   }
 
   render() {
@@ -68,6 +79,7 @@ class App extends React.Component {
               playlistTracks={this.state.playlistTracks}
               onRemove={this.removeTrack}
               onNameChange={this.updatePlaylistName}
+              onSave={this.savePlaylist}
             />
           </div>
         </div>
